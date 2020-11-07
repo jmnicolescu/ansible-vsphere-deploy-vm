@@ -62,10 +62,10 @@ File Name: check_datastore_free_space.yml - Display datastore usage. Fails if da
 
 ### Encrypting a string using GPG and Pass
 
-If the vCenter credentials are managed via GPG and Pass, set the apropiate environment variables
+    If the vCenter credentials are managed via GPG and Pass, set the apropiate environment variables
 
-export TF_VAR_provider_vsphere_host=$(pass provider_vsphere_host)
+    export TF_VAR_provider_vsphere_host=$(pass provider_vsphere_host)
 
-export TF_VAR_provider_vsphere_user=$(pass provider_vsphere_user)
+    export TF_VAR_provider_vsphere_user=$(pass provider_vsphere_user)
 
-export TF_VAR_provider_vsphere_password=$(pass provider_vsphere_password)
+    export TF_VAR_provider_vsphere_password=$(pass provider_vsphere_password)
