@@ -28,7 +28,7 @@ File Name: helpers/create_folders.yml - Create a VM folder and sub folder on giv
 
 File Name: check_datastore_free_space.yml - Display datastore usage. Fails if datastore free space is less than datastore_freespace_limit
 
-### Requirements
+### Requirements 
 
 1. Variables vsphere_tag_category and vsphere_tag must exist
    To create the category and tag execute: cd helpers  &&  ansible-playbook create_tags.yml
