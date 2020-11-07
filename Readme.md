@@ -1,4 +1,4 @@
-# Deploy / Destroy /Tag VMware vSphere Virtual Machines using Ansible
+# Deploy / Destroy VMware vSphere Virtual Machines using Ansible
 
 ### Configuration
 
