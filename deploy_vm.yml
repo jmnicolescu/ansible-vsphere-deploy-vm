@@ -1,0 +1,80 @@
+---
+# -------------------------------------------------------------
+# File Name: deploy_vm.yml
+# Deploy a new VM from a template.
+#
+# Tue Nov 2 12:59:12 BST 2020 - juliusn - initial script
+# -------------------------------------------------------------
+- name: Deploy a new VM from a template
+  hosts: localhost
+  gather_facts: no
+
+  vars_files:
+    - variables.yml
+
+  tasks:
+    # get date
+    - set_fact: creationdate="{{lookup('pipe','date "+%Y/%m/%d %H:%M"')}}"
+
+    - name: Create VM "{{ guest_vm_name }}" from template
+      vmware_guest:
+        validate_certs: no
+
+        # Avoid storing screts in plain text
+        # hostname: "{{ vcenter_host }}"
+        # username: "{{ vcenter_user }}"
+        # password: "{{ vcenter_pass }}"
+
+        # Pass in a value for each variable foo by setting an environment variable called TF_VAR_foo.
+        hostname: "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username: "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password: "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+
+        datacenter: "{{ vsphere_datacenter }}"
+        cluster:    "{{ vsphere_cluster }}"
+        folder:     "{{ vsphere_folder }}/{{ vsphere_sub_folder }}"
+
+        name:     "{{ guest_vm_name }}"
+        template: "/{{ vsphere_datacenter }}/vm/{{ guest_template_folder }}/{{ guest_template }}"
+        guest_id: "{{ guest_id }}"
+        annotation: "{{ guest_annotation }}. Created on {{ creationdate }}"
+
+        disk:
+        - size_gb: "{{ guest_disk0_size | default(25) }}" 
+          type: thin
+          datastore: "{{ vsphere_datastore }}"
+
+        networks:
+        - name: "{{ guest_network }}"
+          ip: "{{ guest_ipv4_address }}"
+          netmask: "{{ guest_ipv4_netmask }}"
+          gateway: "{{ guest_ipv4_gateway }}"
+          dns_servers:
+          - "{{ guest_dns_servers }}"
+
+        hardware:
+          memory_mb: "{{ guest_memory }}"
+          num_cpus: "{{ guest_vcpu }}"
+
+        customization:
+          dns_servers:
+          - "{{ guest_dns_servers }}"
+          domain : "{{ guest_domain }}"
+          hostname: "{{ guest_vm_name }}"
+
+        wait_for_ip_address: no
+        state: poweredon
+      delegate_to: localhost
+
+    - name: Add Tag "{{ guest_tag_name }}" VM "{{ guest_vm_name }}"
+      community.vmware.vmware_tag_manager:
+        validate_certs: no
+        hostname: "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username: "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password: "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+        tag_names:
+          - "{{ guest_tag_name }}"
+        object_name: "{{ guest_vm_name }}"
+        object_type: VirtualMachine
+        state: add
+      delegate_to: localhost

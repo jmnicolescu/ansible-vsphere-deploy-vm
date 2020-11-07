@@ -1,0 +1,44 @@
+---
+# -------------------------------------------------------------
+# File Name: check_datastore_free_space.yml
+# Display datastore usage. Fails if datastore free space is less than datastore_freespace_limit
+#
+# Tue Nov 2 12:59:12 BST 2020 - juliusn - initial script
+# -------------------------------------------------------------
+- name: Display datastore usage. Fails if datastore free space is less than datastore_freespace_limit
+  hosts: localhost
+  gather_facts: no
+
+  vars_files:
+    - ../variables.yml
+
+  tasks:
+    - name: Gather info from datacenter about "{{ vsphere_datastore }}" datastore.
+      community.vmware.vmware_datastore_info:
+        validate_certs: no
+        hostname: "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username: "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password: "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+        datacenter_name: "{{ vsphere_datacenter }}"
+        name: "{{ vsphere_datastore }}" 
+      delegate_to: localhost
+      register: info
+
+    - set_fact: datastore_capacity="{{ (info.datastores[0].capacity|float / 1000000000) | round(1, 'common') }}"
+    - set_fact: datastore_freespace="{{ (info.datastores[0].freeSpace|float / 1000000000) | round(1, 'common') }}"
+    - set_fact: free_space_percentage="{{ (info.datastores[0].freeSpace|float / info.datastores[0].capacity|float * 100) | round(1, 'common') }}"
+
+    - name: Display info about "{{ vsphere_datastore }}" datastore.
+      debug:
+        msg: |
+          Datastore {{ vsphere_datastore }}
+          Capacity {{ datastore_capacity }} GB
+          FreeSpace {{ datastore_freespace }} GB
+          Free Space Percentage {{ free_space_percentage }} %
+      
+    - assert:
+        that: 
+          - (info.datastores[0].freeSpace|float / info.datastores[0].capacity|float * 100) > {{ datastore_freespace_limit }}
+        msg: "Datastore free space percentage {{ free_space_percentage }} % is less than {{ datastore_freespace_limit }} %"
+      any_errors_fatal: true
+

@@ -1,0 +1,39 @@
+---
+# -------------------------------------------------------------
+# File Name: remove_folders.yml
+# Destroy a VM folder and sub folder on given datacenter.
+# {{ vsphere_folder }} / {{ vsphere_sub_folder }}
+#
+# Tue Nov 2 12:59:12 BST 2020 - juliusn - initial script
+# -------------------------------------------------------------
+- name: Remove a VM folder and sub folder.
+  hosts: localhost
+  gather_facts: no
+
+  vars_files:
+    - ../variables.yml
+
+  tasks:
+    - name: Remove sub folder "{{ vsphere_sub_folder }}".
+      community.vmware.vcenter_folder:
+        validate_certs: no
+        hostname: "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username: "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password: "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+        datacenter_name: "{{ vsphere_datacenter }}"
+        folder_name: "{{ vsphere_sub_folder }}"
+        parent_folder: "{{ vsphere_folder }}"
+        state: absent
+      delegate_to: localhost
+
+    - name: Remove VM folder "{{ vsphere_folder }}".
+      community.vmware.vcenter_folder:
+        validate_certs: no
+        hostname: "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username: "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password: "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+        datacenter_name: "{{ vsphere_datacenter }}"
+        folder_name: "{{ vsphere_folder }}"
+        folder_type: vm
+        state: absent
+      delegate_to: localhost

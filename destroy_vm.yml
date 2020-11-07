@@ -1,0 +1,40 @@
+---
+# -------------------------------------------------------------
+# File Name: destroy_vm.yml
+# Power OFF and Remove an existing VM.
+#
+# Tue Nov 2 12:59:12 BST 2020 - juliusn - initial script
+# -------------------------------------------------------------
+- name: Power OFF and Remove an existing VM 
+  hosts: localhost
+  gather_facts: no
+
+  vars_files:
+    - variables.yml
+
+  tasks:
+    - name: Power OFF VM "{{ guest_vm_name }}"
+      vmware_guest:
+        validate_certs: no
+        hostname:   "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username:   "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password:   "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+        datacenter: "{{ vsphere_datacenter }}"
+        cluster:    "{{ vsphere_cluster }}"
+        folder:     "{{ vsphere_folder }}/{{ vsphere_sub_folder }}"
+        name:       "{{ guest_vm_name }}"
+        state: poweredoff
+      delegate_to: localhost
+
+    - name: Remove VM "{{ guest_vm_name }}"
+      vmware_guest:
+        validate_certs: no
+        hostname:   "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username:   "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password:   "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+        datacenter: "{{ vsphere_datacenter }}"
+        cluster:    "{{ vsphere_cluster }}"
+        folder:     "{{ vsphere_folder }}/{{ vsphere_sub_folder }}"
+        name:       "{{ guest_vm_name }}"
+        state: absent
+      delegate_to: localhost

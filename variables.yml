@@ -1,0 +1,41 @@
+# -------------------------------------------------------------
+# File Name: nat-web01
+# Defining VM variables using standard YAML syntax.
+#
+# Tue Nov 3 12:59:12 BST 2020 - juliusn - initial script
+# -------------------------------------------------------------
+
+# -------------------------------------------------------------
+# INFRASTRUCTURE - VMware vSphere vCenter settings 
+# -------------------------------------------------------------
+vsphere_datacenter:  "EAST-DC"
+vsphere_cluster:     "EAST-Cluster"
+vsphere_datastore:   "vsanDatastore"
+vsphere_folder:      "Production"
+vsphere_sub_folder:  "Applications"
+
+# Fail to deploy VM if datastore free space is less than datastore_freespace_limit
+datastore_freespace_limit:  "10"
+
+# -------------------------------------------------------------
+# GUEST - VMware vSphere VM settings 
+# -------------------------------------------------------------
+guest_template:         "CentOS7-Template-noX"
+guest_id:               "centos64Guest"
+guest_template_folder:  "Templates"
+guest_vm_name:          "nat-web01"
+guest_vcpu:             "1"
+guest_memory:           "4096"
+guest_disk0_size:       "30"
+guest_network:          "lab-mgmt"
+guest_ipv4_address:     "192.168.111.49"
+guest_ipv4_netmask:     "255.255.255.0"
+guest_ipv4_gateway:     "192.168.111.1"
+guest_dns_servers:      "192.168.111.111"
+guest_dns_suffix:       "flexlab.local"
+guest_domain:           "flexlab.local"
+       
+guest_category_name:    "CUSTOM-CATEGORY"
+guest_tag_name:         "CUSTOM-TAG"
+
+guest_annotation:       "Using template {{ guest_template }}"

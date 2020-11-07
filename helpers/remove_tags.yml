@@ -1,0 +1,53 @@
+---
+# -------------------------------------------------------------
+# File Name: remove_tags.yml
+# Remove a VMware category and a VM tag.
+#
+# Tue Nov 3 12:59:12 BST 2020 - juliusn - initial script
+# -------------------------------------------------------------
+- name: Remove a VMware category and a VM tag 
+  hosts: localhost
+  gather_facts: no
+
+  vars_files:
+    - ../variables.yml
+
+  tasks:
+    - name: Gather category id from given tag category
+      vmware_category_info:
+        validate_certs: no
+        hostname: "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username: "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password: "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+      delegate_to: localhost
+      register: tag_category_results
+
+    - set_fact:
+        category_id: "{{ item.category_id }}"
+      loop: "{{ tag_category_results.tag_category_info|json_query(query) }}"
+      vars:
+        query: "[?category_name==`{{ guest_category_name }}`]"
+    - debug: var=category_id
+    
+    - name: Remove VM Tag "{{ guest_tag_name }}"
+      community.vmware.vmware_tag:
+        validate_certs: no
+        hostname: "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username: "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password: "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+        category_id: "{{ category_id }}"
+        tag_name: "{{ guest_tag_name }}"
+        state: absent
+      delegate_to: localhost
+
+    - name: Remove category "{{ guest_category_name }}"
+      community.vmware.vmware_category:
+        validate_certs: no
+        hostname: "{{ lookup('env','TF_VAR_provider_vsphere_host') }}"
+        username: "{{ lookup('env','TF_VAR_provider_vsphere_user') }}"
+        password: "{{ lookup('env','TF_VAR_provider_vsphere_password') }}"
+        category_name: "{{ guest_category_name }}"
+        category_description: "{{ guest_category_name }}"
+        category_cardinality: 'multiple'
+        state: absent
+      delegate_to: localhost
