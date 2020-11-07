@@ -2,6 +2,7 @@
 
 ### Configuration
 
+```
 ├── deploy_vm.yml
 ├── destroy_vm.yml
 ├── helpers
@@ -13,7 +14,7 @@
 ├── Readme_gpg.md
 ├── Readme.md
 └── variables.yml
-
+```
 
 File Name: deploy_vm.yml - Deploy a new VM from a template.
 
